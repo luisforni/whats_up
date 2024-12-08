@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends, UploadFile, File
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.posts.models import Post
+from app.profiles.models import Profile
 from app.posts.schemas import PostCreate, PostResponse
 import shutil
 import os
@@ -26,9 +27,24 @@ def upload_file(user_id: int, file: UploadFile = File(...)):
         shutil.copyfileobj(file.file, buffer)
     return {"file_path": file_path}
 
-@router.get("/", response_model=list[PostResponse])
+@router.get("/", response_model=list[dict])
 def get_posts(db: Session = Depends(get_db)):
-    return db.query(Post).all()
+    posts = (
+        db.query(Post, Profile.first_name, Profile.last_name)
+        .join(Profile, Post.user_id == Profile.user_id)
+        .all()
+    )
+    return [
+        {
+            "id": post.id,
+            "user_id": post.user_id,
+            "content": post.content,
+            "first_name": first_name,
+            "last_name": last_name,
+            "created_at": post.created_at,
+        }
+        for post, first_name, last_name in posts
+    ]
 
 @router.get("/posts/{user_id}", response_model=list[PostResponse])
 def get_user_posts(user_id: int, db: Session = Depends(get_db)):

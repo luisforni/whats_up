@@ -15,7 +15,16 @@ def posts_view(page, user_id, navigate_to_profile, navigate_to_chat, on_logout):
                 posts = response.json()
                 posts_list.controls.clear()
                 for post in posts:
-                    posts_list.controls.append(ft.Text(f"{post['user_id']}: {post['content']}"))
+                    post_display = ft.Text(
+                        spans=[
+                            ft.TextSpan(
+                                f"{post['first_name']} {post['last_name']}: ",
+                                style=ft.TextStyle(weight="bold"),  # Aplica negrita
+                            ),
+                            ft.TextSpan(post['content']),  # Contenido del post
+                        ]
+                    )
+                    posts_list.controls.append(post_display)
                 page.update()
             else:
                 page.snack_bar = ft.SnackBar(ft.Text("Error al cargar publicaciones"))
@@ -69,8 +78,13 @@ def posts_view(page, user_id, navigate_to_profile, navigate_to_chat, on_logout):
         [
             ft.Text("Publicaciones", size=24),
             post_input,
-            ft.ElevatedButton("Publicar", on_click=create_post),
-            ft.Row([profile_button, chat_button, logout_button], alignment=ft.MainAxisAlignment.SPACE_EVENLY),
+            ft.Row(
+                [
+                    ft.ElevatedButton("Publicar", on_click=create_post),
+                    ft.Row([profile_button, chat_button, logout_button], alignment=ft.MainAxisAlignment.END),
+                ],
+                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+            ),
             ft.Divider(),
             posts_list,
         ]
