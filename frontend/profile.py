@@ -52,22 +52,26 @@ def profile_view(page, user_id, navigate_to_posts):
         }
 
         if profile_exists:
-            response = requests.put(f"{BASE_URL}/{user_id}/details", json=profile_data)
+            # Actualizar perfil
+            response = requests.put(f"{BASE_URL}/{user_id}", json=profile_data)
         else:
+            # Crear perfil
             response = requests.post(BASE_URL, json=profile_data)
 
         if response.status_code in [200, 201]:
             navigate_to_posts()
         else:
-            page.snack_bar = ft.SnackBar(ft.Text("Error al guardar el perfil"))
+            error_message = response.json().get("detail", "Error al guardar el perfil")
+            page.snack_bar = ft.SnackBar(ft.Text(error_message))
             page.snack_bar.open = True
         page.update()
 
+    # Cargar los datos al inicializar la vista
     fetch_profile()
 
     return ft.Column(
         [
-            ft.Text("Completar Perfil", size=24),
+            ft.Text("Completar o Modificar Perfil", size=24),
             first_name,
             last_name,
             birth_date,

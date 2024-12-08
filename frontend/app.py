@@ -53,14 +53,16 @@ def main(page: ft.Page):
         nonlocal user_id
         user_id = user["id"]
 
+        # Verificar si el perfil existe
         response = requests.get(f"{BASE_URL}/{user_id}")
         if response.status_code == 200:
-            profile_exists = response.json()
-            if profile_exists:
-                navigate_to_posts()
-            else:
-                navigate_to_profile()
+            # Si el perfil existe, ir a publicaciones
+            navigate_to_posts()
+        elif response.status_code == 404:
+            # Si el perfil no existe, redirigir a completar perfil
+            navigate_to_profile()
         else:
+            # Mostrar error en caso de fallo inesperado
             show_snack_bar("Error al verificar el perfil")
 
     navigate_to_login()

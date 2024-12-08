@@ -11,13 +11,13 @@ router = APIRouter()
 UPLOAD_DIR = "uploads/"  # Directorio para almacenar archivos multimedia
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-@router.post("/", response_model=PostResponse)
+@router.post("/", response_model=PostResponse, status_code=201)
 def create_post(post: PostCreate, db: Session = Depends(get_db)):
     db_post = Post(**post.dict())
     db.add(db_post)
     db.commit()
     db.refresh(db_post)
-    return db_post
+    return db_post  # Devuelve directamente el objeto creado
 
 @router.post("/posts/upload", response_model=dict)
 def upload_file(user_id: int, file: UploadFile = File(...)):
